@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Eye'll Be Watching You</title>
+
+    <style>
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    background-color: rgb(149, 146, 162);
+}
+
+#face-and-eyes-container {
+    position: relative;
+    width: 100vh; /* viewport height */
+    height: 100vh; /* viewport height */
+}
+
+#face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    object-fit: contain;
+}
+
+#eye-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+#eye-container::before {
+    content: "";  /* Mandatory for the pseudo-element to show */
+    position: absolute;  /* Absolute positioning relative to the eye container */
+    top: 40%;  /* Position at the top of the eye container */
+    left: 25%;  /* Position at the left of the eye container */
+    width: 50%;  /* Take full width of the eye container */
+    height: 20%;  /* Take full height of the eye container */
+    background-color: white;  /* White background color */
+    z-index: -1;  /* Position behind the eyes */
+}
+
+.eye {
+    position: absolute;
+    width: 15%;
+    height: auto;
+    object-fit: contain;
+}
+
+#left-eye {
+    top: 44%;
+    left: 29%;
+    transition: all 0.5s ease;
+}
+
+#right-eye {
+    top: 44%;
+    left: 56%;
+    transition: all 0.5s ease;
+}
+
+#closed-eyes {
+    position: absolute;
+    top: 40%;
+    left: 25%;
+    width: 48%; 
+    height: 24%; 
+    z-index: 3;  /* Above the eyes but under other potential overlays */
+}
+    </style>
+
+  </head>
+
+  <body>
+
+    <div id="face-and-eyes-container">
+        <img id="face" src="catface.png">
+        <img id="closed-eyes" src="closedeyes.png" style="display: none;">
+        <div id="eye-container">
+            <img id="left-eye" class="eye" src="eye.png">
+            <img id="right-eye" class="eye" src="eye.png">
+            <div id="white-background"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+    
+        // URL to your teachable machine model
+        let modelURL = "https://teachablemachine.withgoogle.com/models/Tzmzk9jov/";
+        let model, webcam, labelContainer, maxPredictions;
+    
+        // Load the image model and setup the webcam
+        async function init() {
+            const modelURLComplete = modelURL + "model.json";
+            const metadataURL = modelURL + "metadata.json";
+    
+            // Load the model
+            model = await tmImage.load(modelURLComplete, metadataURL);
+            maxPredictions = model.getTotalClasses();
+    
+            // Setup the webcam
+            const flip = true; // whether to flip the webcam
+            webcam = new tmImage.Webcam(400, 400, flip); // width, height, flip
+            await webcam.setup(); // request access to the webcam
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+        }
+    
+        async function loop() {
+            webcam.update(); // update the webcam frame
+            await predict();
+            setTimeout(() => {
+                window.requestAnimationFrame(loop);
+            }, 50); // Delay of 1 second (1000 milliseconds)
+        }
+    
+        async function predict() {
+            // Predict the image from the webcam
+            const prediction = await model.predict(webcam.canvas);
+            let highestProbability = -1;
+            let highestClass = "";
+            for (let i = 0; i < maxPredictions; i++) {
+                if(prediction[i].probability > highestProbability){
+                    highestProbability = prediction[i].probability;
+                    highestClass = prediction[i].className;
+                }
+            }
+    
+            // Define separate positions for the left and right eyes based on the prediction
+            let leftEyeHorizontalPosition;
+            let rightEyeHorizontalPosition;
+            let eyeVerticalPosition;
+    
+            if (highestClass === 'Left') {
+                leftEyeHorizontalPosition = '26%';
+                rightEyeHorizontalPosition = '53%';
+                eyeVerticalPosition = '44%';
+            } else if (highestClass === 'Right') {
+                leftEyeHorizontalPosition = '32%';
+                rightEyeHorizontalPosition = '59%';
+                eyeVerticalPosition = '44%';
+            } else if (highestClass === 'Up') {
+                leftEyeHorizontalPosition = '29%';
+                rightEyeHorizontalPosition = '56%';
+                eyeVerticalPosition = '40%';
+            } else if (highestClass === 'Down') {
+                leftEyeHorizontalPosition = '29%';
+                rightEyeHorizontalPosition = '56%';
+                eyeVerticalPosition = '47%';
+            } else if (highestClass === 'Center') {
+                leftEyeHorizontalPosition = '29%';
+                rightEyeHorizontalPosition = '56%';
+                eyeVerticalPosition = '44%';
+            }
+            if (highestClass === 'Neutral') {
+    document.getElementById('closed-eyes').style.display = 'block';  // Show the closed eyes
+} else {
+    document.getElementById('closed-eyes').style.display = 'none';  // Hide the closed eyes
+}
+
+    
+            // Update the positions of the eyes independently
+            document.getElementById('left-eye').style.left = leftEyeHorizontalPosition;
+            document.getElementById('right-eye').style.left = rightEyeHorizontalPosition;
+            document.getElementById('left-eye').style.top = eyeVerticalPosition;
+            document.getElementById('right-eye').style.top = eyeVerticalPosition;
+        }
+    
+        init();
+    
+    </script>
+    
+  </body>
+</html>
