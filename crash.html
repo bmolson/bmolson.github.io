@@ -53,28 +53,31 @@
         let isFlashing = false;
 
         function startFlashing() {
-            if (isFlashing) return;
+        if (isFlashing) return;
 
-            isFlashing = true;
-            let flashState = false;
-            flashingInterval = setInterval(() => {
-                const lightningElement = document.getElementById("lightning");
-                document.body.style.backgroundColor = flashState ? '#333333' : '#666666';
-                lightningElement.style.display = flashState ? 'none' : 'block';
-                flashState = !flashState;
-            }, 100);
+        isFlashing = true;
+        let flashState = false;
+        flashingInterval = setInterval(() => {
+            const lightningElement = document.getElementById("lightning");
+            const cloudElement = document.getElementById("cloud");
+            document.body.style.backgroundColor = flashState ? '#333333' : '#666666';
+            lightningElement.style.display = flashState ? 'none' : 'block';
+            cloudElement.style.filter = flashState ? 'brightness(100%)' : 'brightness(70%)'; // Adjust brightness for flashing effect
+            flashState = !flashState;
+        }, 100);
 
-            setTimeout(() => {
-                stopFlashing();
-            }, 3000);
-        }
+        setTimeout(() => {
+            stopFlashing();
+        }, 3000);
+    }
 
-        function stopFlashing() {
-            clearInterval(flashingInterval);
-            document.getElementById("lightning").style.display = 'none';
-            document.body.style.backgroundColor = '#333333';
-            isFlashing = false;
-        }
+    function stopFlashing() {
+        clearInterval(flashingInterval);
+        document.getElementById("lightning").style.display = 'none';
+        document.getElementById("cloud").style.filter = 'brightness(100%)'; // Reset cloud brightness
+        document.body.style.backgroundColor = '#333333';
+        isFlashing = false;
+    }
 
         async function createModel() {
             const checkpointURL = URL + "model.json";
