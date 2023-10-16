@@ -24,7 +24,7 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    z-index: 2;
+    z-index: 0;
     object-fit: contain;
 }
 
@@ -32,18 +32,18 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    z-index: -1;
 }
 
 #eye-container::before {
     content: "";  /* Mandatory for the pseudo-element to show */
     position: absolute;  /* Absolute positioning relative to the eye container */
-    top: 40%;  /* Position at the top of the eye container */
-    left: 25%;  /* Position at the left of the eye container */
-    width: 50%;  /* Take full width of the eye container */
-    height: 20%;  /* Take full height of the eye container */
+    top: 23%;  /* Position at the top of the eye container */
+    left: 35%;  /* Position at the left of the eye container */
+    width: 25%;  /* Take full width of the eye container */
+    height: 10%;  /* Take full height of the eye container */
     background-color: white;  /* White background color */
-    z-index: -1;  /* Position behind the eyes */
+    z-index: 2;  /* Position behind the eyes */
 }
 
 .eye {
@@ -51,28 +51,23 @@ body {
     width: 15%;
     height: auto;
     object-fit: contain;
+    z-index: 2;
 }
 
 #left-eye {
-    top: 44%;
-    left: 29%;
+    scale: 54%;
+    top: 20%;
+    left: 34%;
     transition: all 0.5s ease;
 }
 
 #right-eye {
-    top: 44%;
-    left: 56%;
+    scale: 54%;
+    top: 19%;
+    left: 47%;
     transition: all 0.5s ease;
 }
 
-#closed-eyes {
-    position: absolute;
-    top: 40%;
-    left: 25%;
-    width: 48%; 
-    height: 24%; 
-    z-index: 3;  /* Above the eyes but under other potential overlays */
-}
     </style>
 
   </head>
@@ -80,11 +75,11 @@ body {
   <body>
 
     <div id="face-and-eyes-container">
-        <img id="face" src="catface.png">
+        <img id="face" src="leophoto.png">
         <img id="closed-eyes" src="closedeyes.png" style="display: none;">
         <div id="eye-container">
-            <img id="left-eye" class="eye" src="eye.png">
-            <img id="right-eye" class="eye" src="eye.png">
+            <img id="left-eye" class="eye" src="eyephoto.png">
+            <img id="right-eye" class="eye" src="eyephoto.png">
             <div id="white-background"></div>
         </div>
     </div>
@@ -140,31 +135,27 @@ body {
             let eyeVerticalPosition;
     
             if (highestClass === 'Left') {
-                leftEyeHorizontalPosition = '26%';
-                rightEyeHorizontalPosition = '53%';
-                eyeVerticalPosition = '44%';
-            } else if (highestClass === 'Right') {
                 leftEyeHorizontalPosition = '32%';
-                rightEyeHorizontalPosition = '59%';
-                eyeVerticalPosition = '44%';
+                rightEyeHorizontalPosition = '45%';
+                eyeVerticalPosition = '20%';
+            } else if (highestClass === 'Right') {
+                leftEyeHorizontalPosition = '36%';
+                rightEyeHorizontalPosition = '49%';
+                eyeVerticalPosition = '20%';
             } else if (highestClass === 'Up') {
-                leftEyeHorizontalPosition = '29%';
-                rightEyeHorizontalPosition = '56%';
-                eyeVerticalPosition = '40%';
+                leftEyeHorizontalPosition = '34%';
+                rightEyeHorizontalPosition = '47%';
+                eyeVerticalPosition = '22%';
             } else if (highestClass === 'Down') {
-                leftEyeHorizontalPosition = '29%';
-                rightEyeHorizontalPosition = '56%';
-                eyeVerticalPosition = '47%';
+                leftEyeHorizontalPosition = '34%';
+                rightEyeHorizontalPosition = '47%';
+                eyeVerticalPosition = '18%';
             } else if (highestClass === 'Center') {
-                leftEyeHorizontalPosition = '29%';
-                rightEyeHorizontalPosition = '56%';
-                eyeVerticalPosition = '44%';
+                leftEyeHorizontalPosition = '34%';
+                rightEyeHorizontalPosition = '47%';
+                eyeVerticalPosition = '20%';
             }
-            if (highestClass === 'Neutral') {
-    document.getElementById('closed-eyes').style.display = 'block';  // Show the closed eyes
-} else {
-    document.getElementById('closed-eyes').style.display = 'none';  // Hide the closed eyes
-}
+
 
     
             // Update the positions of the eyes independently
