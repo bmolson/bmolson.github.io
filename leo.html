@@ -11,7 +11,7 @@ body {
     flex-direction: column;
     height: 100vh;
     margin: 0;
-    background-color: rgb(149, 146, 162);
+    background-color: rgb(226, 185, 62);
 }
 
 #face-and-eyes-container {
@@ -28,20 +28,20 @@ body {
     object-fit: contain;
 }
 
-#eye-container {
+#eyes-container {
     position: absolute;
     width: 100%;
     height: 100%;
     z-index: -1;
 }
 
-#eye-container::before {
+#eyes-container::before {
     content: "";  /* Mandatory for the pseudo-element to show */
     position: absolute;  /* Absolute positioning relative to the eye container */
-    top: 23%;  /* Position at the top of the eye container */
+    top: 21%;  /* Position at the top of the eye container */
     left: 35%;  /* Position at the left of the eye container */
-    width: 25%;  /* Take full width of the eye container */
-    height: 10%;  /* Take full height of the eye container */
+    width: 25.5%;  /* Take full width of the eye container */
+    height: 12%;  /* Take full height of the eye container */
     background-color: white;  /* White background color */
     z-index: 2;  /* Position behind the eyes */
 }
@@ -56,19 +56,19 @@ body {
 
 #left-eye {
     scale: 54%;
-    top: 20%;
-    left: 34%;
+    top: 19%;
+    left: 35%;
     transition: all 0.5s ease;
 }
 
 #right-eye {
     scale: 54%;
-    top: 20%;
-    left: 47%;
+    top: 19%;
+    left: 48.7%;
     transition: all 0.5s ease;
 }
 
-    </style>
+</style>
 
   </head>
 
@@ -76,8 +76,7 @@ body {
 
     <div id="face-and-eyes-container">
         <img id="face" src="leophoto.png">
-        <img id="closed-eyes" src="closedeyes.png" style="display: none;">
-        <div id="eye-container">
+        <div id="eyes-container">
             <img id="left-eye" class="eye" src="eyephoto.png">
             <img id="right-eye" class="eye" src="eyephoto.png">
             <div id="white-background"></div>
@@ -130,44 +129,31 @@ body {
             }
     
             // Define separate positions for the left and right eyes based on the prediction
-            let leftEyeHorizontalPosition;
-            let rightEyeHorizontalPosition;
-            let eyeVerticalPosition;
-    
-            if (highestClass === 'Left') {
-                leftEyeHorizontalPosition = '32%';
-                rightEyeHorizontalPosition = '45%';
-                eyeVerticalPosition = '20%';
-            } else if (highestClass === 'Right') {
-                leftEyeHorizontalPosition = '36%';
-                rightEyeHorizontalPosition = '49%';
-                eyeVerticalPosition = '20%';
-            } else if (highestClass === 'Up') {
-                leftEyeHorizontalPosition = '34%';
-                rightEyeHorizontalPosition = '47%';
-                eyeVerticalPosition = '17%';
-            } else if (highestClass === 'Down') {
-                leftEyeHorizontalPosition = '34%';
-                rightEyeHorizontalPosition = '47%';
-                eyeVerticalPosition = '21%';
-            } else if (highestClass === 'Center') {
-                leftEyeHorizontalPosition = '34%';
-                rightEyeHorizontalPosition = '47%';
-                eyeVerticalPosition = '20%';
-            }
-            else if (highestClass === 'Neutral') {
-                leftEyeHorizontalPosition = '34%';
-                rightEyeHorizontalPosition = '47%';
-                eyeVerticalPosition = '20%';
-            }
+// Define separate positions for the container based on the prediction
+let eyeContainerHorizontalPosition;
+let eyeContainerVerticalPosition;
 
+if (highestClass === 'Left') {
+    eyeContainerHorizontalPosition = '-2%';
+    eyeContainerVerticalPosition = '0%';
+} else if (highestClass === 'Right') {
+    eyeContainerHorizontalPosition = '2%';
+    eyeContainerVerticalPosition = '0%';
+} else if (highestClass === 'Up') {
+    eyeContainerHorizontalPosition = '0%';
+    eyeContainerVerticalPosition = '-2%';
+} else if (highestClass === 'Down') {
+    eyeContainerHorizontalPosition = '0%';
+    eyeContainerVerticalPosition = '2%';
+} else if (highestClass === 'Center' || highestClass === 'Neutral') {
+    eyeContainerHorizontalPosition = '0%';
+    eyeContainerVerticalPosition = '0%';
+}
 
-    
-            // Update the positions of the eyes independently
-            document.getElementById('left-eye').style.left = leftEyeHorizontalPosition;
-            document.getElementById('right-eye').style.left = rightEyeHorizontalPosition;
-            document.getElementById('left-eye').style.top = eyeVerticalPosition;
-            document.getElementById('right-eye').style.top = eyeVerticalPosition;
+// Update the positions of the eyes container
+document.getElementById('eyes-container').style.left = eyeContainerHorizontalPosition;
+document.getElementById('eyes-container').style.top = eyeContainerVerticalPosition;
+
         }
     
         init();
