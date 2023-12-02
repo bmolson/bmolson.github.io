@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Random Place Selector</title>
+    <style>
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: url('worldmap.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+
+#content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 80%;
+    z-index: 2; /* Ensure the content is on top of the overlay */
+}
+
+#placeName {
+    font-size: 60px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center; /* Center align the text */
+    word-wrap: break-word; /* Breaks the word to the next line if it's too long */
+}
+
+#placeLocation {
+    font-size: 40px;
+    font-weight: normal;
+}
+
+#buttonContainer {
+    position: fixed;
+    bottom: 200px;
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+}
+
+button {
+    background-color: yellow;
+    color: black;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s;
+}
+
+button:hover {
+    background-color: #fada5e;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3);
+}
+    </style>
+</head>
+<body>
+    <div id="content">
+        <div id="placeName">Click the button to start</div>
+        <div id="placeLocation"></div>
+        <div id="buttonContainer">
+            <button onclick="toggleRandomizer()">Start/Stop</button>
+        </div>
+    </div>
+    <script>
+     var places = [
+    {"name": "The Town Where Roller Skates Were First Patented", "location": "Belleville, Illinois, USA"},
+    {"name": "First Recorded Sighting of a UFO", "location": "Roswell, New Mexico, USA"},
+    {"name": "Location of the World's First Vending Machine", "location": "Ancient Alexandria, Egypt"},
+    {"name": "The Village That Invented Tickling Sticks", "location": "Knotty Ash, England"},
+    {"name": "First Public Street Lighting by Gas", "location": "Pall Mall, London, England"},
+    {"name": "World's First Beauty Contest", "location": "Troy, Ancient Greece"},
+    {"name": "Town Known for the Oldest Preserved Wheel", "location": "Ljubljana Marshes, Slovenia"},
+    {"name": "Site of the First Known Kite Flying", "location": "Weifang, Shandong, China"},
+    {"name": "Town with the First Recorded Game of Baseball", "location": "Hoboken, New Jersey, USA"},
+    {"name": "City Where the First Lock and Key Were Used", "location": "Nineveh, Ancient Mesopotamia"},
+    {"name": "First Place to Use a Police Whistle", "location": "London, England"},
+    {"name": "Town Where the First Postcard Was Sent", "location": "Vienna, Austria"},
+    {"name": "Location of the Oldest Surviving Receipt", "location": "Ancient Mesopotamia"},
+    {"name": "City with the First Public Color TV Demonstration", "location": "London, England"},
+    {"name": "The Birthplace of Modern Canoeing", "location": "Scotland"},
+    {"name": "World's First Chess Manual", "location": "Baghdad, Iraq"},
+    {"name": "Oldest Recorded Bowling Alley", "location": "Southampton, England"},
+    {"name": "First City to Reach a Population of One Million", "location": "Rome, Italy"},
+    {"name": "Discovery of the World's Oldest Shoe", "location": "Areni-1 cave, Armenia"},
+    {"name": "First Successful Parachute Jump", "location": "Paris, France"},
+    {"name": "World's Oldest Surviving Banknote", "location": "Sichuan, China"},
+    {"name": "First Modern Encyclopedia Compiled", "location": "Paris, France"},
+    {"name": "Inventor of the Modern Zipper", "location": "Chicago, Illinois, USA"},
+    {"name": "First Recorded Use of an Umbrella", "location": "Ancient Egypt"},
+    {"name": "World's Oldest Surviving Written Recipe", "location": "Mesopotamia"},
+    {"name": "First Parking Meter Installed", "location": "Oklahoma City, Oklahoma, USA"},
+    {"name": "World's First Recorded Twin Birth", "location": "Ancient Rome"},
+    {"name": "World's Oldest Known Artificial Pigment", "location": "Blombos Cave, South Africa"},
+    {"name": "First Roses Cultivated for Perfumery", "location": "Persia (now Iran)"},
+    {"name": "First Recorded Snowman", "location": "Amsterdam, Netherlands"},
+    {"name": "The Great Emu War", "location": "Western Australia, Australia"},
+    {"name": "Cheese Rolling Competition", "location": "Gloucestershire, England"},
+    {"name": "Invention of Bubble Wrap", "location": "Hawthorne, New Jersey, USA"},
+    {"name": "First Underwater Post Office", "location": "Vanuatu"},
+    {"name": "Largest Gathering of People Dressed as Witches", "location": "La Paz, Mexico"},
+    {"name": "Inventor of the Trampoline", "location": "Cedar Rapids, Iowa, USA"},
+    {"name": "First Country to Broadcast Television", "location": "England"},
+    {"name": "Tomato Fight Festival (La Tomatina)", "location": "Buñol, Spain"},
+    {"name": "Longest Traffic Jam", "location": "Beijing, China"},
+    {"name": "First Webcam (Coffee Pot Cam)", "location": "Cambridge, England"},
+    {"name": "Largest Gathering of Santa Clauses", "location": "Derry City, Northern Ireland"},
+    {"name": "First Country to Grant Women the Right to Vote", "location": "New Zealand"},
+    {"name": "Deepest Music Concert (Underground)", "location": "Kryvyi Rih, Ukraine"},
+    {"name": "City Where Roller Skates Were Invented", "location": "London, England"},
+    {"name": "First Country to Broadcast Color TV", "location": "United States"},
+    {"name": "First Use of Paper Money", "location": "Chengdu, China"},
+    {"name": "World's First Pizzeria", "location": "Naples, Italy"},
+    {"name": "First Country to Use Postage Stamps", "location": "United Kingdom"},
+    {"name": "Wife Carrying Championship", "location": "Sonkajärvi, Finland"},
+    {"name": "World's Largest Gathering of Twins", "location": "Twinsburg, Ohio, USA"},
+    {"name": "First Soft Serve Ice Cream Machine", "location": "Dover, Delaware, USA"},
+    {"name": "Oldest Continuous Rodeo", "location": "Prescott, Arizona, USA"},
+    {"name": "Annual Giant Omelette Celebration", "location": "Bessières, France"},
+    {"name": "First Traffic Lights", "location": "Cleveland, Ohio, USA"},
+    {"name": "First Recorded Pie Eating Contest", "location": "Toronto, Canada"},
+    {"name": "Invention of the First Mechanical Computer", "location": "London, England"},
+    {"name": "World's First Public Movie Theater", "location": "Paris, France"},
+    {"name": "World's Longest Running Soap Opera", "location": "Melbourne, Australia"},
+    {"name": "Place Where Paper Money Was First Used", "location": "Chengdu, China"},
+    {"name": "Largest Annual Kite Festival", "location": "Ahmedabad, India"},
+    {"name": "Original Mermaid Parade", "location": "Coney Island, New York, USA"},
+    {"name": "First Country to Broadcast Radio Signal", "location": "United Kingdom"},
+    {"name": "Annual Pumpkin Regatta", "location": "Windsor, Nova Scotia, Canada"},
+    {"name": "First Chocolate Factory", "location": "Barcelona, Spain"},
+    {"name": "First Practical Dishwasher", "location": "Shelbyville, Indiana, USA"},
+    {"name": "Historic Underground Bookstores", "location": "Buenos Aires, Argentina"},
+    {"name": "Biennial Donkey Race", "location": "Alba, Italy"},
+    {"name": "First Popularized Yo-Yo", "location": "Paris, France"},
+    {"name": "Largest Gathering of Redheads", "location": "Breda, Netherlands"},
+    {"name": "Oldest Recorded Game of Cricket", "location": "Guildford, England"},
+    {"name": "First Public Electric Tram Service", "location": "Berlin, Germany"},
+    {"name": "Inventor of Instant Coffee", "location": "Buffalo, New York, USA"},
+    {"name": "Bathtub Race", "location": "Nanaimo, British Columbia, Canada"},
+    {"name": "Largest Collection of Troll Dolls", "location": "Alliance, Nebraska, USA"},
+    {"name": "'Ugly Sweater Day'", "location": "Boulder, Colorado, USA"},
+    {"name": "Mosquito Festival", "location": "Clute, Texas, USA"},
+    {"name": "Pirate Festival with Mock Battles", "location": "Penzance, England"},
+    {"name": "Largest Kaleidoscope", "location": "Mount Tremper, New York, USA"},
+    {"name": "Annual 'Zombie Walk' Parade", "location": "Brisbane, Australia"},
+    {"name": "Dinosaur Egg Hunt", "location": "Lourinhã, Portugal"},
+    {"name": "Underwater Music Festival", "location": "Florida Keys, Florida, USA"},
+    {"name": "Turnip Festival", "location": "Richterswil, Switzerland"},
+    {"name": "Festival Dedicated to Painted Cows", "location": "Cheyenne, Wyoming, USA"},
+    {"name": "'Flying Fish' Contest", "location": "Yilan County, Taiwan"},
+    {"name": "'Superhero Run' Charity Event", "location": "Nottingham, England"},
+    {"name": "'Pumpkin Chuckin' Contest", "location": "Millsboro, Delaware, USA"},
+    {"name": "Sandcastle Building Championship", "location": "Virginia Beach, Virginia, USA"},
+    {"name": "Giant Omelette Celebration", "location": "Abbeville, Louisiana, USA"},
+    {"name": "Snail Racing Championship", "location": "Congham, England"},
+    {"name": "Collection of Miniature Books", "location": "Baku, Azerbaijan"},
+    {"name": "Famous 'Ghost Tours'", "location": "Edinburgh, Scotland"},
+    {"name": "Gravy Wrestling Championships", "location": "Lancashire, England"},
+    {"name": "Festival for Paper Airplanes", "location": "Salzburg, Austria"},
+    {"name": "Largest Disco Ball", "location": "Leeds, England"},
+    {"name": "Avocado Festival", "location": "Fallbrook, California, USA"},
+    {"name": "International Festival of Owls", "location": "Houston, Minnesota, USA"},
+    {"name": "'National Gorilla Suit Day'", "location": "Anywhere, USA"},
+    {"name": "The Town with the Annual Great Frog Jump Festival", "location": "Angels Camp, California, USA"},
+    {"name": "World's Only Squirrel Bridge", "location": "Longview, Washington, USA"},
+    {"name": "The Village of the World's Largest Soup Pot", "location": "Erbendorf, Germany"},
+    {"name": "Home of the World's Oldest Rodeo", "location": "Prescott, Arizona, USA"},
+    {"name": "The City with the Most Ice Cream Shops Per Capita", "location": "Burlington, Vermont, USA"},
+    {"name": "Town with the Largest Collection of Superhero Costumes", "location": "Elkhart, Indiana, USA"},
+    {"name": "The Birthplace of the World's First Teddy Bear", "location": "Giengen, Germany"},
+    {"name": "City Famous for Its Annual Bathtub Race", "location": "Nanaimo, British Columbia, Canada"},
+    {"name": "The World's Largest Collection of Smallest Versions of Largest Things", "location": "Lucas, Kansas, USA"},
+    {"name": "The Town with the Longest Main Street", "location": "Island Park, Idaho, USA"},
+    {"name": "Location of the World's First Underwater Post Office", "location": "Vanuatu"},
+    {"name": "The Town with the World's Largest Knitted Sweater", "location": "Loretto, Minnesota, USA"},
+    {"name": "City Known for Its Underground Kayaking Tours", "location": "Louisville, Kentucky, USA"},
+    {"name": "Village with the Annual Orange-Throwing Battle", "location": "Ivrea, Italy"},
+    {"name": "The City with the Oldest Continuously Operating Public Library", "location": "Salisbury, England"},
+    {"name": "Home of the World's Largest Wind Chime", "location": "Casey, Illinois, USA"},
+    {"name": "The City of the World's First Beer Spa", "location": "Prague, Czech Republic"},
+    {"name": "Location of the World's Largest Hand-Dug Well", "location": "Greensburg, Kansas, USA"},
+    {"name": "Village Famous for Its Hedgehog Sanctuary", "location": "St. Tiggywinkles, England"},
+    {"name": "City with the Most Inhabited Bridges", "location": "Florence, Italy"},
+    {"name": "Town of the Annual 'Flying Mullet' Festival", "location": "Swansboro, North Carolina, USA"},
+    {"name": "Home of the World's Oldest Continuously Running Movie Theater", "location": "La Ciotat, France"},
+    {"name": "The Birthplace of the Fortune Cookie", "location": "Kyoto, Japan (not San Francisco)"},
+    {"name": "City Famous for Its Underground Tunnels Used as Wine Cellars", "location": "Mileștii Mici, Moldova"},
+    {"name": "Town with the World's Largest Collection of Lawn Flamingos", "location": "Madison, Wisconsin, USA"},
+    {"name": "Village Known for Its Annual 'Pirate Day'", "location": "Hastings, England"},
+    {"name": "City Hosting the World's Largest Gathering of Twins and Multiples", "location": "Twinsburg, Ohio, USA"},
+    {"name": "The Home of the World's Largest Kaleidoscope", "location": "Mount Tremper, New York, USA"},
+    {"name": "The Town with the World's Largest Collection of Miniature Books", "location": "Baku, Azerbaijan"},
+    {"name": "Location of the World's First Chocolate Museum", "location": "Cologne, Germany"},
+    {"name": "The City with the Oldest Public Park in the USA", "location": "Boston, Massachusetts, USA"},
+    {"name": "Village Hosting an Annual Leek Show", "location": "Harrogate, England"},
+    {"name": "City Known for Its Unique Firefly Watching Tours", "location": "Kuala Selangor, Malaysia"},
+    {"name": "Town with the World's Largest Annual Marbles Tournament", "location": "Tinsley Green, England"},
+    {"name": "City with the Largest Collection of Dinosaur Fossils", "location": "Drumheller, Alberta, Canada"},
+    {"name": "Home of the World's Largest Yo-Yo Museum", "location": "Chico, California, USA"},
+    {"name": "Town Famous for Its Annual Woolly Worm Festival", "location": "Banner Elk, North Carolina, USA"},
+    {"name": "Village with a Tradition of Painting Their Houses in Bright Colors", "location": "Burano, Italy"},
+    {"name": "The Birthplace of the World's First Soft Serve Ice Cream Machine", "location": "Dover, Delaware, USA"},
+    {"name": "City Famous for Its Historic Ghost Walks", "location": "York, England"},
+    {"name": "Location of the World's First Artificial Surfing Lake", "location": "Snowdonia, Wales"},
+    {"name": "Town with the World's Largest Collection of Smallest Versions of Largest Things", "location": "Lucas, Kansas, USA"},
+    {"name": "Home of the World's Largest Chess Piece", "location": "St. Louis, Missouri, USA"},
+    {"name": "City with the Most Historical Covered Bridges", "location": "Parke County, Indiana, USA"},
+    {"name": "Town Known for the Oldest Annual Horse Race", "location": "Siena, Italy"},
+    {"name": "Village with the World's Largest Garlic Festival", "location": "Gilroy, California, USA"},
+    {"name": "City Hosting the World's Largest Pumpkin Festival", "location": "Ludwigsburg, Germany"},
+    {"name": "The First Town to be Lit by Electricity", "location": "Godalming, England"},
+    {"name": "Location of the World's Longest Continuous Sidewalk", "location": "Bayshore Boulevard, Tampa, Florida, USA"},
+    {"name": "Home of the World's First Electric Traffic Light", "location": "Cleveland, Ohio, USA"},
+    {"name": "Town Famous for Its Annual Camel Wrestling Championship", "location": "Selçuk, Turkey"},
+    {"name": "City Known for the World's Largest Underground Trampoline Park", "location": "Blaenau Ffestiniog, Wales"},
+    {"name": "Village Celebrating an Annual Potato Festival", "location": "Ballyjamesduff, Ireland"},
+    {"name": "The Birthplace of the Modern Hula Hoop", "location": "Wham-O, California, USA"},
+    {"name": "Town with the World's Largest Annual Ice Wine Festival", "location": "Niagara, Canada"},
+    {"name": "Home of the World's Largest Pencil", "location": "New York City, New York, USA"},
+    {"name": "City Famous for Its Annual Viking Festival", "location": "York, England"},
+    {"name": "Village with the Largest Collection of Gargoyles", "location": "Chaumont, France"},
+    {"name": "City with the Oldest Zoo Still in Operation", "location": "Vienna, Austria"},
+    {"name": "Town Known for the World's Biggest Fish Fry", "location": "Paris, Tennessee, USA"},
+    {"name": "Location of the World's First Underwater Sculpture Park", "location": "Grenada, Caribbean"},
+    {"name": "Home of the World's Oldest Flower Garden", "location": "Khorasan, Iran"},
+    {"name": "Town Famous for Its Annual Mud Festival", "location": "Boryeong, South Korea"},
+    {"name": "City with the Largest Gathering of People Wearing False Mustaches", "location": "Boulder, Colorado, USA"},
+    {"name": "Village Known for the World's Largest Gingerbread Man", "location": "Molde, Norway"},
+    {"name": "City Hosting the Annual World Snail Racing Championships", "location": "Congham, England"},
+    {"name": "Home of the World's Largest Rotary Phone", "location": "Birmingham, Alabama, USA"},
+    {"name": "Town with the Oldest Continuous Pie Making Company", "location": "Tipton, Indiana, USA"},
+    {"name": "City Known for the World's First Solar-Powered Ferris Wheel", "location": "Santa Monica, California, USA"},
+    {"name": "Location of the World's Largest Hand-Knitted Sweater", "location": "London, England"},
+    {"name": "The Birthplace of the World's First Space Tourist", "location": "New York, New York, USA"},
+    {"name": "Town Famous for the Largest Annual Gathering of Scarecrows", "location": "Kettlewell, England"},
+    {"name": "City with the Most Extensive Collection of Street Art", "location": "Melbourne, Australia"},
+    {"name": "Village Known for the World's Largest Oyster Festival", "location": "Galway, Ireland"},
+    {"name": "City with the Oldest Continuously Running Puppet Theater", "location": "Lyon, France"},
+    {"name": "Town Famous for Hosting the World's Largest Tea Party", "location": "Altensteig, Germany"},
+    {"name": "Home of the World's First Skyscraper", "location": "Chicago, Illinois, USA"},
+    {"name": "Village with the Longest-Running Annual Tulip Festival", "location": "Ottawa, Canada"},
+    {"name": "City Famous for Its Historic Lighthouse", "location": "Portland, Maine, USA"},
+    {"name": "Location of the World's First Publicly Funded Park", "location": "Derby, England"},
+    {"name": "Town Known for the World's Largest Gathering of Elvis Impersonators", "location": "Parkes, Australia"},
+    {"name": "Home of the World's Oldest Surviving Music Hall", "location": "Glasgow, Scotland"},
+    {"name": "City with the First Recorded Soccer Game", "location": "London, England"},
+    {"name": "Village Celebrating the Annual Artichoke Festival", "location": "Castroville, California, USA"},
+    {"name": "Town Famous for the World's Largest Ice Cream Sundae", "location": "Edmonton, Alberta, Canada"},
+    {"name": "Location of the World's Largest Airshow", "location": "Oshkosh, Wisconsin, USA"},
+    {"name": "City Known for the World's Oldest Tattoo Parlor", "location": "Copenhagen, Denmark"},
+    {"name": "Home of the World's First Digital Computer", "location": "Ames, Iowa, USA"},
+    {"name": "Town with the World's Largest Annual Polka Festival", "location": "Ennis, Texas, USA"},
+    {"name": "Village Known for the World's Oldest Toy Store", "location": "London, England"},
+    {"name": "City Hosting the Annual Hot Air Balloon Fiesta", "location": "Albuquerque, New Mexico, USA"},
+    {"name": "Location of the World's First Public Aquarium", "location": "London, England"},
+    {"name": "Town Celebrating the Annual Pea Shooting World Championship", "location": "Witcham, England"},
+    {"name": "City with the Largest Collection of Art Deco Buildings", "location": "Miami Beach, Florida, USA"},
+    {"name": "Home of the World's First Roller Coaster", "location": "Coney Island, New York, USA"},
+    {"name": "Town Famous for Its Historic Viking Ship Museum", "location": "Roskilde, Denmark"},
+    {"name": "City with the Oldest Stone Bridge Still in Use", "location": "Písek, Czech Republic"},
+    {"name": "Village Known for the World's Largest Annual Matryoshka Festival", "location": "Sergiyev Posad, Russia"},
+    {"name": "Location of the World's Largest Monopoly Board Game", "location": "San Jose, California, USA"}
+];
+
+        var isRandomizing = false;
+        var randomizer;
+
+        function displayRandomPlace() {
+            var randomIndex = Math.floor(Math.random() * places.length);
+            var place = places[randomIndex];
+            document.getElementById('placeName').innerText = place.name;
+            document.getElementById('placeLocation').innerText = place.location;
+        }
+
+        function toggleRandomizer() {
+            if (!isRandomizing) {
+                randomizer = setInterval(displayRandomPlace, 100);
+                isRandomizing = true;
+            } else {
+                clearInterval(randomizer);
+                isRandomizing = false;
+            }
+        }
+    </script>
+
+</body>
+</html>
