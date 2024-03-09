@@ -11,7 +11,7 @@ body {
     flex-direction: column;
     height: 100vh;
     margin: 0;
-    background-color: rgb(62, 226, 78);
+    background-color: rgb(211, 215, 75);
 }
 
 #face-and-eyes-container {
@@ -128,10 +128,11 @@ body {
                     highestClass = prediction[i].className;
                 }
             }
-    
-            // Define separate positions for the left and right eyes based on the prediction
-// Define separate positions for the container based on the prediction
-let eyeContainerHorizontalPosition;
+            const sensitivityThreshold = 0.6; // 60% probability
+
+// Check if the highest probability exceeds the threshold
+if (highestProbability > sensitivityThreshold) {
+    let eyeContainerHorizontalPosition;
 let eyeContainerVerticalPosition;
 
 if (highestClass === 'Left') {
@@ -150,6 +151,15 @@ if (highestClass === 'Left') {
     eyeContainerHorizontalPosition = '0%';
     eyeContainerVerticalPosition = '0%';
 }
+} else {
+    {
+    eyeContainerHorizontalPosition = '0%';
+    eyeContainerVerticalPosition = '0%';
+}
+}
+            // Define separate positions for the left and right eyes based on the prediction
+// Define separate positions for the container based on the prediction
+
 
 // Update the positions of the eyes container
 document.getElementById('eyes-container').style.left = eyeContainerHorizontalPosition;
