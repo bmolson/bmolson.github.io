@@ -1,175 +1,137 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <title>Eye'll Be Watching You</title>
+<style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: rgb(255, 255, 255); /* This is the color you'll see if the eyes move out of the white background. */
+        }
 
-    <style>
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    height: 100vh;
-    margin: 0;
-    background-color: rgb(211, 215, 75);
-}
+        #face-and-eyes-container {
+            position: relative;
+            width: 100vh; /* viewport height */
+            height: 100vh; /* viewport height */
+        }
 
-#face-and-eyes-container {
-    position: relative;
-    width: 100vh; /* viewport height */
-    height: 100vh; /* viewport height */
-}
+        #face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 3; /* On top of the white background and eyes */
+            object-fit: contain;
+        }
 
-#face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    object-fit: contain;
-}
+        #white-background {
+            position: absolute;
+            width: 100%; /* Match the size of the face image */
+            height: 100%; /* Match the size of the face image */
+            background-color: white; /* The white background color */
+            z-index: 1; /* Behind the eyes but above the body background */
+        }
 
-#eyes-container {
-    position: absolute;
-    transition: all 0.3s ease;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-}
+        #eyes-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 2; /* Above the white background but below the face image */
+        }
 
-#eyes-container::before {
-    content: "";  /* Mandatory for the pseudo-element to show */
-    position: absolute;  /* Absolute positioning relative to the eye container */
-    top: 21%;  /* Position at the top of the eye container */
-    left: 35%;  /* Position at the left of the eye container */
-    width: 25.5%;  /* Take full width of the eye container */
-    height: 12%;  /* Take full height of the eye container */
-    background-color: white;  /* White background color */
-    z-index: 2;  /* Position behind the eyes */
-}
+        .eye {
+            position: absolute;
+            width: 10%; /* Adjust the size of the eyes if needed */
+            height: auto;
+            object-fit: contain;
+        }
 
-.eye {
-    position: absolute;
-    width: 15%;
-    height: auto;
-    object-fit: contain;
-    z-index: 2;
-}
+        #left-eye {
+            scale: 0.6;
+            top: 21.5%;
+            left: 37.25%;
+            transition: transform 0.5s ease;
+        }
 
-#left-eye {
-    scale: 54%;
-    top: 19%;
-    left: 35%;
-    transition: all 0.5s ease;
-}
-
-#right-eye {
-    scale: 54%;
-    top: 19%;
-    left: 48.7%;
-    transition: all 0.5s ease;
-}
-
-</style>
-
-  </head>
-
-  <body>
-
+        #right-eye {
+            scale: 0.6;
+            top: 21.5%;
+            left: 51%;
+            transition: transform 0.5s ease;
+        }
+    </style>
+</head>
+<body>
     <div id="face-and-eyes-container">
         <img id="face" src="leophoto.png">
         <div id="eyes-container">
             <img id="left-eye" class="eye" src="eyephoto.png">
             <img id="right-eye" class="eye" src="eyephoto.png">
-            <div id="white-background"></div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
     <script type="text/javascript">
-    
-        // URL to your teachable machine model
         let modelURL = "https://teachablemachine.withgoogle.com/models/Tzmzk9jov/";
-        let model, webcam, labelContainer, maxPredictions;
-    
-        // Load the image model and setup the webcam
+        let model, webcam, maxPredictions;
+
         async function init() {
             const modelURLComplete = modelURL + "model.json";
             const metadataURL = modelURL + "metadata.json";
-    
-            // Load the model
+
             model = await tmImage.load(modelURLComplete, metadataURL);
             maxPredictions = model.getTotalClasses();
-    
-            // Setup the webcam
-            const flip = true; // whether to flip the webcam
-            webcam = new tmImage.Webcam(400, 400, flip); // width, height, flip
+
+            webcam = new tmImage.Webcam(400, 400, true); // width, height, flip
             await webcam.setup(); // request access to the webcam
             await webcam.play();
+            //document.getElementById('face-and-eyes-container').appendChild(webcam.canvas);
             window.requestAnimationFrame(loop);
         }
-    
+
         async function loop() {
             webcam.update(); // update the webcam frame
             await predict();
-            setTimeout(() => {
-                window.requestAnimationFrame(loop);
-            }, 50); // Delay of 1 second (1000 milliseconds)
+            window.requestAnimationFrame(loop);
         }
-    
+
         async function predict() {
-            // Predict the image from the webcam
             const prediction = await model.predict(webcam.canvas);
             let highestProbability = -1;
             let highestClass = "";
             for (let i = 0; i < maxPredictions; i++) {
-                if(prediction[i].probability > highestProbability){
+                if (prediction[i].probability > highestProbability) {
                     highestProbability = prediction[i].probability;
                     highestClass = prediction[i].className;
                 }
             }
-            const sensitivityThreshold = 0.6; // 60% probability
 
-// Check if the highest probability exceeds the threshold
-if (highestProbability > sensitivityThreshold) {
-    let eyeContainerHorizontalPosition;
-let eyeContainerVerticalPosition;
+            let eyeContainerHorizontalPosition = '0%'; // Default to center
+            let eyeContainerVerticalPosition = '0%'; // Default to center
 
-if (highestClass === 'Left') {
-    eyeContainerHorizontalPosition = '-2%';
-    eyeContainerVerticalPosition = '0%';
-} else if (highestClass === 'Right') {
-    eyeContainerHorizontalPosition = '2%';
-    eyeContainerVerticalPosition = '0%';
-} else if (highestClass === 'Up') {
-    eyeContainerHorizontalPosition = '0%';
-    eyeContainerVerticalPosition = '-2%';
-} else if (highestClass === 'Down') {
-    eyeContainerHorizontalPosition = '0%';
-    eyeContainerVerticalPosition = '2%';
-} else if (highestClass === 'Center' || highestClass === 'Neutral') {
-    eyeContainerHorizontalPosition = '0%';
-    eyeContainerVerticalPosition = '0%';
-}
-} else {
-    {
-    eyeContainerHorizontalPosition = '0%';
-    eyeContainerVerticalPosition = '0%';
-}
-}
-            // Define separate positions for the left and right eyes based on the prediction
-// Define separate positions for the container based on the prediction
+            if (highestProbability > 0.75) { // Sensitivity threshold
+                if (highestClass === 'Left') {
+                    eyeContainerHorizontalPosition = '-2%';
+                } else if (highestClass === 'Right') {
+                    eyeContainerHorizontalPosition = '2%';
+                }
 
+                if (highestClass === 'Up') {
+                    eyeContainerVerticalPosition = '-2%';
+                } else if (highestClass === 'Down') {
+                    eyeContainerVerticalPosition = '2%';
+                }
+            }
 
-// Update the positions of the eyes container
-document.getElementById('eyes-container').style.left = eyeContainerHorizontalPosition;
-document.getElementById('eyes-container').style.top = eyeContainerVerticalPosition;
-
+            document.getElementById('eyes-container').style.left = eyeContainerHorizontalPosition;
+            document.getElementById('eyes-container').style.top = eyeContainerVerticalPosition;
         }
-    
+
         init();
-    
     </script>
-    
-  </body>
+</body>
 </html>
