@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Recognition with Teachable Machine</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* Hide scrollbars */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: background-color 0.5s ease;
+        }
+        .character-image {
+            position: absolute;
+            max-width: 100%;
+            max-height: 100%;
+            transition: opacity 1s ease;
+            opacity: 0; /* Images are initially hidden */
+        }
+    </style>
+</head>
+<body onload="init()">
+
+<img src="spongebob-face.png" id="spongeBobImage" class="character-image">
+<img src="patrick-face.png" id="patrickImage" class="character-image">
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+<script type="text/javascript">
+    const URL = "https://teachablemachine.withgoogle.com/models/F0fGwrH-1/";
+
+    let model, webcam, maxPredictions;
+
+    async function init() {
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        const flip = true;
+        webcam = new tmImage.Webcam(200, 200, flip);
+        await webcam.setup({ facingMode: "user" });
+        await webcam.play();
+        window.requestAnimationFrame(loop);
+    }
+
+    async function loop() {
+        webcam.update();
+        await predict();
+        window.requestAnimationFrame(loop);
+    }
+
+    async function predict() {
+    const prediction = await model.predict(webcam.canvas);
+    let spongeBobImage = document.getElementById('spongeBobImage');
+    let patrickImage = document.getElementById('patrickImage');
+
+    // Reset images opacity
+    spongeBobImage.style.opacity = '0';
+    patrickImage.style.opacity = '0';
+
+    // Assume neither character is recognized initially
+    document.body.style.backgroundColor = "#808080"; // Default to gray background
+
+    for (let i = 0; i < maxPredictions; i++) {
+        if (prediction[i].className === "SpongeBob" && prediction[i].probability > 0.75) {
+            spongeBobImage.style.opacity = '1'; // Show SpongeBob image
+            document.body.style.backgroundColor = "#fde047"; // Change background to yellow
+            break;
+        } else if (prediction[i].className === "Patrick" && prediction[i].probability > 0.75) {
+            patrickImage.style.opacity = '1'; // Show Patrick image
+            document.body.style.backgroundColor = "#ff92a9"; // Change background to pinkish-purple
+            break;
+        }
+    }
+}
+
+</script>
+
+</body>
+</html>

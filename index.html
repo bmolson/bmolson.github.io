@@ -1,96 +1,96 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Wave Detection</title>
-    <style>
-      body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            height: 100vh;
-            margin: 0;
-            background-color: #ea7171;
-            font-family: Arial, sans-serif;
-            font-size: 100px;
-            color: rgb(252, 246, 78);
-        }
-
-    #webcam-container {
-                        width: 400px;
-                        height: 400px;
-                        position: relative;
-                        display: none;
-                    }
-
-    #label-container {
-                        font-size: 2em;
-                        font-weight: bold;
-                    }
-    </style>
-  </head>
-  <body>
-    <div id="webcam-container"></div>
-    <div id="label-container"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-    <script type="text/javascript">
-
-// URL to your teachable machine model
-let modelURL = "https://teachablemachine.withgoogle.com/models/DEf-K_173/";
-let model, webcam, labelContainer, maxPredictions;
-
-// Load the image model and setup the webcam
-async function init() {
-    const modelURLComplete = modelURL + "model.json";
-    const metadataURL = modelURL + "metadata.json";
-
-    // Load the model
-    model = await tmImage.load(modelURLComplete, metadataURL);
-    maxPredictions = model.getTotalClasses();
-
-    // Setup the webcam
-    const flip = true; // whether to flip the webcam
-    webcam = new tmImage.Webcam(400, 400, flip); // width, height, flip
-    await webcam.setup(); // request access to the webcam
-    await webcam.play();
-    window.requestAnimationFrame(loop);
-
-    // Append elements to the DOM
-    document.getElementById("webcam-container").appendChild(webcam.canvas);
-    labelContainer = document.getElementById("label-container");
-}
-
-async function loop() {
-    webcam.update(); // update the webcam frame
-    await predict();
-    window.requestAnimationFrame(loop);
-}
-
-// Run the webcam image through the image model
-async function predict() {
-    // Predict can take in an image, video or canvas html element
-    const prediction = await model.predict(webcam.canvas);
-    let highestProbability = -1;
-    let highestClass = "";
-    for (let i = 0; i < maxPredictions; i++) {
-        if(prediction[i].probability > highestProbability){
-            highestProbability = prediction[i].probability;
-            highestClass = prediction[i].className;
-        }
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Artworks</title>
+<style>
+    body {
+        background-color: #f0f0f0; /* Light gray background */
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        text-align: center; /* Center align the content */
     }
 
-    if(highestClass === "Wave"){
-        labelContainer.innerHTML = "Hello";
-    } else {
-        labelContainer.innerHTML = "";
+    h1, p {
+        color: #333; /* Dark gray color */
     }
-}
 
-init();
+    .links {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px; /* Space between items */
+        margin-top: 20px;
+    }
 
+    .link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 150px; /* Width of each link block */
+    }
 
-    </script>
-  </body>
+    .link a {
+        border: none;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .link img {
+        width: 100%; /* Make the image fill the container */
+        border-radius: 5px;
+        transition: transform 0.3s ease;
+    }
+
+    .link img:hover {
+        transform: scale(1.05); /* Slightly enlarge images on hover */
+    }
+
+    .description {
+        font-size: 0.9em;
+        color: #666;
+    }
+</style>
+</head>
+<body>
+
+<h1>Interactive Artworks</h1>
+<p>Please follow these links to try my interactive artwork demos. All of these have been created with help from Google's Teachable Machine and ChatGPT.</p>
+
+<div class="links">
+    <div class="link">
+        <a href="helloworld.html" target="_blank">
+            <img src="wavethumb.png" alt="Hello World">
+        </a>
+        <div class="description">Detects a hand wave and says hello.</div>
+    </div>
+    <div class="link">
+        <a href="starspin.html" target="_blank">
+            <img src="starthumb.png" alt="Star Spin">
+        </a>
+        <div class="description">Wave a hand to control a spinning star on screen</div>
+    </div>
+    <div class="link">
+        <a href="spongebob.html" target="_blank">
+            <img src="bobthumb.png" alt="SpongeBob Detector">
+        </a>
+        <div class="description">Show your camera a picture of SpongeBob or Patrick and it will recognize them</div>
+    </div>
+    <div class="link">
+        <a href="crash.html" target="_blank">
+            <img src="crashthumb.png" alt="Thunder Sound Detector">
+        </a>
+        <div class="description">Recognizes a thunder sound made by voice and flashes a lightning bolt on screen.</div>
+    </div>
+    <div class="link">
+        <a href="leo.html" target="_blank">
+            <img src="leothumb.png" alt="Cat's Eye Direction">
+        </a>
+        <div class="description">Recognizes basic directions with a cat toy and move the cat’s eyes accordingly.</div>
+    </div>
+</div>
+
+</body>
 </html>
-
