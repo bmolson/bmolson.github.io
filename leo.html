@@ -10,7 +10,7 @@
             flex-direction: column;
             height: 100vh;
             margin: 0;
-            background-color: rgb(255, 255, 255); /* This is the color you'll see if the eyes move out of the white background. */
+            background-color: rgb(244, 200, 110); /* This is the color you'll see if the eyes move out of the white background. */
         }
 
         #face-and-eyes-container {
@@ -29,9 +29,11 @@
 
         #white-background {
             position: absolute;
-            width: 100%; /* Match the size of the face image */
-            height: 100%; /* Match the size of the face image */
+            width: 240px; /* Match the size of the face image */
+            height: 100px; /* Match the size of the face image */
             background-color: white; /* The white background color */
+            top: 20%;
+            left: 36%;
             z-index: 1; /* Behind the eyes but above the body background */
         }
 
@@ -66,11 +68,12 @@
 </head>
 <body>
     <div id="face-and-eyes-container">
-        <img id="face" src="leophoto.png">
+        <div id="white-background"></div> <!-- This is the white background -->
         <div id="eyes-container">
             <img id="left-eye" class="eye" src="eyephoto.png">
             <img id="right-eye" class="eye" src="eyephoto.png">
         </div>
+        <img id="face" src="leophoto.png">
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
