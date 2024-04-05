@@ -67,8 +67,8 @@
         const URL = "https://teachablemachine.withgoogle.com/models/OguvCh-oR/";
         let model, webcam, labelContainer, maxPredictions;
         let isRotating = false;
-        let rotationStartTime = 0;
-        let lastTimestamp = 0;
+        let cumulativeRotation = { x: 0, y: 0, z: 0 };
+        let lastRotationUpdate = Date.now();
         const rotationSpeed = 50; // Degrees per second
 
         async function init() {
@@ -108,28 +108,27 @@
             }
             if (waveDetected && !isRotating) {
                 isRotating = true;
+                lastRotationUpdate = Date.now(); // Reset the last update timestamp
                 requestAnimationFrame(rotateCube);
             } else if (!waveDetected) {
                 isRotating = false;
             }
         }
 
-        function rotateCube(timestamp) {
-            if (!rotationStartTime) rotationStartTime = timestamp;
-            const elapsedTime = timestamp - rotationStartTime;
-            if (!isRotating) {
-                rotationStartTime = 0;
-                lastTimestamp = 0;
-                return;
-            }
+        function rotateCube() {
+            if (isRotating) {
+                const now = Date.now();
+                const delta = (now - lastRotationUpdate) / 1000; // Time elapsed in seconds since last update
+                const rotationIncrement = delta * rotationSpeed; // Calculate rotation increment based on elapsed time
+                cumulativeRotation.x += rotationIncrement;
+                cumulativeRotation.y += rotationIncrement;
+                cumulativeRotation.z += rotationIncrement;
 
-            const rotationAngle = (elapsedTime / 1000) * rotationSpeed;
-            document.getElementById("cube").style.transform = `rotateX(${rotationAngle}deg) rotateY(${rotationAngle}deg) rotateZ(${rotationAngle}deg)`;
+                document.getElementById("cube").style.transform = `rotateX(${cumulativeRotation.x}deg) rotateY(${cumulativeRotation.y}deg) rotateZ(${cumulativeRotation.z}deg)`;
 
-            if (lastTimestamp !== timestamp) {
-                requestAnimationFrame(rotateCube);
+                lastRotationUpdate = now; // Update the last update timestamp
+                requestAnimationFrame(rotateCube); // Continue the animation
             }
-            lastTimestamp = timestamp;
         }
 
         window.onload = init;
