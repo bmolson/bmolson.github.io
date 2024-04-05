@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave Detection</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #333; /* Dark gray background */
+        }
+
+        #cube-container {
+            perspective: 1000px;
+            width: 400px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #cube {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 1px solid #eee; /* Optional: adds a slight border to each face for better visibility */
+        }
+
+        .front { transform: translateZ(100px); background-color: #ff6f61; }
+        .back { transform: rotateY(180deg) translateZ(100px); background-color: #ffd166; }
+        .right { transform: rotateY(90deg) translateZ(100px); background-color: #06d6a0; }
+        .left { transform: rotateY(-90deg) translateZ(100px); background-color: #118ab2; }
+        .top { transform: rotateX(90deg) translateZ(100px); background-color: #073b4c; }
+        .bottom { transform: rotateX(-90deg) translateZ(100px); background-color: #f4a261; }
+
+        #webcam-container { display: none; }
+    </style>
+</head>
+<body>
+    <div id="cube-container">
+        <div id="cube">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face right"></div>
+            <div class="face left"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+        </div>
+    </div>
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/OguvCh-oR/";
+        let model, webcam, labelContainer, maxPredictions;
+        let isRotating = false;
+        let rotationStartTime = 0;
+        let lastTimestamp = 0;
+        const rotationSpeed = 50; // Degrees per second
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            const flip = true;
+            webcam = new tmImage.Webcam(200, 200, flip);
+            await webcam.setup();
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
+            }
+        }
+
+        async function loop() {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            let waveDetected = false;
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = prediction[i].className;
+                labelContainer.childNodes[i].innerHTML = "";
+                if (classPrediction === "Wave" && prediction[i].probability > 0.8) {
+                    waveDetected = true;
+                    break;
+                }
+            }
+            if (waveDetected && !isRotating) {
+                isRotating = true;
+                requestAnimationFrame(rotateCube);
+            } else if (!waveDetected) {
+                isRotating = false;
+            }
+        }
+
+        function rotateCube(timestamp) {
+            if (!rotationStartTime) rotationStartTime = timestamp;
+            const elapsedTime = timestamp - rotationStartTime;
+            if (!isRotating) {
+                rotationStartTime = 0;
+                lastTimestamp = 0;
+                return;
+            }
+
+            const rotationAngle = (elapsedTime / 1000) * rotationSpeed;
+            document.getElementById("cube").style.transform = `rotateX(${rotationAngle}deg) rotateY(${rotationAngle}deg) rotateZ(${rotationAngle}deg)`;
+
+            if (lastTimestamp !== timestamp) {
+                requestAnimationFrame(rotateCube);
+            }
+            lastTimestamp = timestamp;
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
