@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You Lose!</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: rgb(207, 55, 55); /* Change background to red */
+            height: 100vh; /* Full viewport height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        img {
+            max-width: 60%; /* Make images larger to occupy more space */
+            height: auto;
+            border: none; /* Remove any border */
+            outline: none; /* Remove any outline */
+            display: none; /* Hide initially */
+        }
+        canvas {
+            display: none; /* Hide webcam preview */
+        }
+    </style>
+</head>
+<body>
+    <img id="gameImage" src="" alt="Rock-Paper-Scissors">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/Detw8gfid/"; // Your new trained model's directory
+        let model, webcam, maxPredictions;
+        let gameImage = document.getElementById("gameImage");
+
+        // Initialize Teachable Machine model
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            // Setup webcam
+            webcam = new tmImage.Webcam(200, 200, true); // Webcam dimensions
+            await webcam.setup();
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+        }
+
+        // Start detecting human gestures
+        async function loop() {
+            webcam.update(); // Update the webcam frame
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        // Predict the human gesture and respond with a winning gesture
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+
+            // Find the highest probability gesture
+            let highestPrediction = { className: "", probability: 0 };
+            prediction.forEach(p => {
+                if (p.probability > highestPrediction.probability) {
+                    highestPrediction = p;
+                }
+            });
+
+            // Determine the computer's winning move based on human gesture
+            if (highestPrediction.className === "Rock" && highestPrediction.probability > 0.8) {
+                gameImage.src = "paper.png"; // Paper beats rock
+                gameImage.style.display = "block"; // Show the image
+            } else if (highestPrediction.className === "Paper" && highestPrediction.probability > 0.8) {
+                gameImage.src = "scissors.png"; // Scissors beat paper
+                gameImage.style.display = "block"; // Show the image
+            } else if (highestPrediction.className === "Scissors" && highestPrediction.probability > 0.8) {
+                gameImage.src = "rock.png"; // Rock beats scissors
+                gameImage.style.display = "block"; // Show the image
+            } else if (highestPrediction.className === "None") {
+                gameImage.style.display = "none"; // Hide the image when no gesture is detected
+            }
+        }
+
+        // Start the model and webcam when the page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

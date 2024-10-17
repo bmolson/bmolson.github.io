@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Dot Movement</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrollbars */
+            background-color: black;
+        }
+        canvas {
+            display: block;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="artCanvas"></canvas>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/dmayoL0AG/";
+        let model, webcam, maxPredictions;
+        let canvas, ctx, dots = [], center, waveDetected = false, originalPositions = [];
+        let canvasWidth = window.innerWidth;
+        let canvasHeight = window.innerHeight;
+        const minClumpRadius = 100; // Minimum radius for the clump (200px diameter)
+        const dotRadius = 10; // Increased dot radius
+
+        // Dot class
+        class Dot {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.originalX = x;
+                this.originalY = y;
+                this.targetX = null;
+                this.targetY = null;
+                this.inClump = false; // Tracks if the dot has found a spot in the clump
+            }
+
+            // Draw the dot on the canvas
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, dotRadius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            // Move the dot towards its target clump position more slowly
+            moveToClump() {
+                if (!this.inClump) {
+                    this.findClumpPosition();
+                }
+                this.x += (this.targetX - this.x) * 0.02; // Slower movement to clump
+                this.y += (this.targetY - this.y) * 0.02;
+
+                // Check if the dot has reached its target
+                if (Math.abs(this.targetX - this.x) < 1 && Math.abs(this.targetY - this.y) < 1) {
+                    this.inClump = true; // Mark as in clump once it reaches target
+                }
+            }
+
+            // Move the dot back to its original position faster
+            moveToOriginal() {
+                this.x += (this.originalX - this.x) * 0.1; // Faster return movement
+                this.y += (this.originalY - this.y) * 0.1;
+                this.inClump = false; // Reset clump status when returning
+            }
+
+            // Find a position inside the clump for the dot to move towards
+            findClumpPosition() {
+                let angle = Math.random() * Math.PI * 2; // Random angle
+                let radius = Math.random() * minClumpRadius; // Random distance from center
+
+                this.targetX = center.x + Math.cos(angle) * radius;
+                this.targetY = center.y + Math.sin(angle) * radius;
+            }
+        }
+
+        // Initialize the canvas and create random dots
+        function initCanvas() {
+            canvas = document.getElementById("artCanvas");
+            ctx = canvas.getContext("2d");
+            resizeCanvas();
+
+            // Create random dots with random colors
+            for (let i = 0; i < 100; i++) {
+                const x = Math.random() * canvasWidth;
+                const y = Math.random() * canvasHeight;
+                const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                const dot = new Dot(x, y, color);
+                dots.push(dot);
+                originalPositions.push({x: x, y: y});
+            }
+
+            // Set initial center position
+            center = { x: canvasWidth / 2, y: canvasHeight / 2 };
+
+            // Draw the initial scattered dots
+            draw();
+        }
+
+        // Resize canvas to match window size
+        function resizeCanvas() {
+            canvasWidth = window.innerWidth;
+            canvasHeight = window.innerHeight;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            center = { x: canvasWidth / 2, y: canvasHeight / 2 };
+        }
+
+        // Draw the dots on the canvas
+        function draw() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            dots.forEach(dot => {
+                if (waveDetected) {
+                    dot.moveToClump();
+                } else {
+                    dot.moveToOriginal();
+                }
+                dot.draw();
+            });
+
+            requestAnimationFrame(draw);
+        }
+
+        // Initialize Teachable Machine automatically when the page loads
+        window.addEventListener('load', async () => {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            try {
+                // Load the model and metadata
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                // Setup webcam without showing it on the page
+                const flip = true;
+                webcam = new tmImage.Webcam(200, 200, flip); 
+                await webcam.setup();
+                await webcam.play();
+                console.log("Webcam setup complete!");
+                window.requestAnimationFrame(loop);
+
+                // Initialize canvas
+                initCanvas();
+            } catch (error) {
+                console.error("Error during webcam setup or model loading:", error);
+            }
+        });
+
+        async function loop() {
+            webcam.update(); // update the webcam frame
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        // Predict if a wave is detected and update waveDetected variable
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            for (let i = 0; i < maxPredictions; i++) {
+                if (prediction[i].className === "Wave" && prediction[i].probability > 0.9) {
+                    waveDetected = true;
+                } else if (prediction[i].className === "NoWave" && prediction[i].probability > 0.9) {
+                    waveDetected = false;
+                }
+            }
+        }
+
+        // Adjust canvas size on window resize
+        window.addEventListener('resize', resizeCanvas);
+    </script>
+</body>
+</html>
