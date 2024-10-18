@@ -73,13 +73,13 @@
             });
 
             // Determine the computer's winning move based on human gesture
-            if (highestPrediction.className === "Rock" && highestPrediction.probability > 0.8) {
+            if (highestPrediction.className === "Rock" && highestPrediction.probability > 0.9) {
                 gameImage.src = "paper.png"; // Paper beats rock
                 gameImage.style.display = "block"; // Show the image
-            } else if (highestPrediction.className === "Paper" && highestPrediction.probability > 0.8) {
+            } else if (highestPrediction.className === "Paper" && highestPrediction.probability > 0.9) {
                 gameImage.src = "scissors.png"; // Scissors beat paper
                 gameImage.style.display = "block"; // Show the image
-            } else if (highestPrediction.className === "Scissors" && highestPrediction.probability > 0.8) {
+            } else if (highestPrediction.className === "Scissors" && highestPrediction.probability > 0.9) {
                 gameImage.src = "rock.png"; // Rock beats scissors
                 gameImage.style.display = "block"; // Show the image
             } else if (highestPrediction.className === "None") {

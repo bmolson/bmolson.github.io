@@ -10,7 +10,7 @@
             flex-direction: column;
             height: 100vh;
             margin: 0;
-            background-color: rgb(244, 200, 110); /* This is the color you'll see if the eyes move out of the white background. */
+            background-color: rgb(244, 200, 110); /* Background color */
         }
 
         #face-and-eyes-container {
@@ -37,75 +37,76 @@
             z-index: 1; /* Behind the eyes but above the body background */
         }
 
-        #eyes-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 2; /* Above the white background but below the face image */
-        }
+#eyes-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 2; /* Above the white background but below the face image */
+}
 
-        .eye {
-            position: absolute;
-            width: 10%; /* Adjust the size of the eyes if needed */
-            height: auto;
-            object-fit: contain;
-        }
+.eye {
+    position: absolute;
+    width: 10%; /* Adjust the size of the eyes if needed */
+    height: auto;
+    object-fit: contain;
+}
 
-        #left-eye {
-            scale: 0.6;
-            top: 21.5%;
-            left: 37.25%;
-            transition: transform 0.5s ease;
-        }
+#left-eye {
+    scale: 0.6;
+    top: 21.5%;
+    left: 37.25%;
+    transition: transform 0.5s ease;
+}
 
-        #right-eye {
-            scale: 0.6;
-            top: 21.5%;
-            left: 51%;
-            transition: transform 0.5s ease;
-        }
-    </style>
+#right-eye {
+    scale: 0.6;
+    top: 21.5%;
+    left: 51%;
+    transition: transform 0.5s ease;
+}
+</style>
 </head>
 <body>
-    <div id="face-and-eyes-container">
-        <div id="white-background"></div> <!-- This is the white background -->
-        <div id="eyes-container">
-            <img id="left-eye" class="eye" src="eyephoto.png">
-            <img id="right-eye" class="eye" src="eyephoto.png">
-        </div>
-        <img id="face" src="leophoto.png">
-    </div>
+<div id="face-and-eyes-container">
+<div id="white-background"></div> <!-- This is the white background -->
+<div id="eyes-container">
+    <img id="left-eye" class="eye" src="eyephoto.png">
+    <img id="right-eye" class="eye" src="eyephoto.png">
+</div>
+<img id="face" src="leophoto.png">
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
-    <script type="text/javascript">
-        let modelURL = "https://teachablemachine.withgoogle.com/models/lPWdUi9cS/"; // Updated to your new model URL
-        let model, webcam, maxPredictions;
-    
-        async function init() {
-            const modelURLComplete = modelURL + "model.json";
-            const metadataURL = modelURL + "metadata.json";
-    
-            model = await tmImage.load(modelURLComplete, metadataURL);
-            maxPredictions = model.getTotalClasses();
-    
-            webcam = new tmImage.Webcam(400, 400, true); // width, height, flip
-            await webcam.setup(); // request access to the webcam
-            await webcam.play();
-            // The webcam canvas append line is removed to not display the webcam preview
-            window.requestAnimationFrame(loop);
-        }
-    
-        async function loop() {
-            webcam.update(); // update the webcam frame
-            await predict();
-            window.requestAnimationFrame(loop);
-        }
-    
-        async function predict() {
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+<script type="text/javascript">
+let modelURL = "https://teachablemachine.withgoogle.com/models/Tzmzk9jov/"; // Updated to your new model URL
+let model, webcam, maxPredictions;
+
+async function init() {
+    const modelURLComplete = modelURL + "model.json";
+    const metadataURL = modelURL + "metadata.json";
+
+    model = await tmImage.load(modelURLComplete, metadataURL);
+    maxPredictions = model.getTotalClasses();
+
+    webcam = new tmImage.Webcam(400, 400, true); // width, height, flip
+    await webcam.setup(); // request access to the webcam
+    await webcam.play();
+    window.requestAnimationFrame(loop);
+}
+
+async function loop() {
+    webcam.update(); // update the webcam frame
+    await predict();
+    window.requestAnimationFrame(loop);
+}
+
+async function predict() {
     const prediction = await model.predict(webcam.canvas);
     let highestProbability = -1;
     let highestClass = "";
+
+    // Find the class with the highest probability
     for (let i = 0; i < maxPredictions; i++) {
         if (prediction[i].probability > highestProbability) {
             highestProbability = prediction[i].probability;
@@ -113,43 +114,44 @@
         }
     }
 
-    console.log("Detected class:", highestClass, "with probability:", highestProbability);
+    // Set default eye positions (no movement)
+    let leftEyeTranslateX = 0;
+    let rightEyeTranslateX = 0;
+    let leftEyeTranslateY = 0;
+    let rightEyeTranslateY = 0;
 
-    let eyeTranslateX = 0; // Reset translations to center
-    let eyeTranslateY = 0; // Reset translations to center
+    // Define the amount of movement for each eye
+    const leftEyeMovementX = 30;  // Horizontal movement
+    const rightEyeMovementX = 30; // Horizontal movement
+    const leftEyeMovementY = 30;  // Vertical movement
+    const rightEyeMovementY = 30; // Vertical movement
 
-    if (highestProbability > 0.60) { // Adjusted threshold
-        switch(highestClass) {
-            case 'Left':
-                eyeTranslateX = -20; // Adjust based on your setup
-                break;
-            case 'Right':
-                eyeTranslateX = 23; // Adjust based on your setup
-                break;
-            case 'Up':
-                eyeTranslateY = -20; // This should move the eyes up
-                break;
-            case 'Down':
-                eyeTranslateY = 20; // This should move the eyes down
-                break;
-            case 'Center':
-            case 'Neutral':
-                eyeTranslateX = 0; // Ensure neutral position resets both axes
-                eyeTranslateY = 0;
-                break;
+    // Move the eyes based on the detected class and probability
+    if (highestProbability > 0.80) { // Threshold for detection
+        if (highestClass === 'Left') {
+            leftEyeTranslateX = -leftEyeMovementX;  // Move left eye left
+            rightEyeTranslateX = -rightEyeMovementX;  // Right eye moves slightly left
+        } else if (highestClass === 'Right') {
+            leftEyeTranslateX = rightEyeMovementX;  // Left eye moves slightly right
+            rightEyeTranslateX = rightEyeMovementX;  // Move right eye right
+        } else if (highestClass === 'Up') {
+            leftEyeTranslateY = -leftEyeMovementY;  // Move both eyes up
+            rightEyeTranslateY = -rightEyeMovementY;
+        } else if (highestClass === 'Down') {
+            leftEyeTranslateY = leftEyeMovementY;  // Move both eyes down
+            rightEyeTranslateY = rightEyeMovementY;
         }
     }
 
-    // Ensure the translate function correctly applies both X and Y transformations
-    const transformValue = `translate(${eyeTranslateX}px, ${eyeTranslateY}px)`;
-    document.getElementById('left-eye').style.transform = transformValue;
-    document.getElementById('right-eye').style.transform = transformValue;
+    // Apply both horizontal and vertical movement together
+    document.getElementById('left-eye').style.transform = `translate(${leftEyeTranslateX}px, ${leftEyeTranslateY}px)`;
+    document.getElementById('right-eye').style.transform = `translate(${rightEyeTranslateX}px, ${rightEyeTranslateY}px)`;
+
+    console.log("Detected class:", highestClass, "with probability:", highestProbability);
+
 }
 
-
-    
-        init();
-    </script>
-    
+init();
+</script>
 </body>
 </html>
